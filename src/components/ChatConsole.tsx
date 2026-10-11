@@ -10,6 +10,9 @@ import {
   Check,
   Sparkles,
   Shield,
+  ShieldAlert,
+  Smartphone,
+  Terminal,
   Hand,
   Brain,
   Cpu,
@@ -35,6 +38,7 @@ interface ChatConsoleProps {
   onOpenBiometrics: () => void;
   onOpenGestures: () => void;
   onOpenMemory: () => void;
+  onOpenProtestHub?: () => void;
   userProfile: UserBiometricProfile;
 }
 
@@ -49,6 +53,7 @@ export const ChatConsole: React.FC<ChatConsoleProps> = ({
   onOpenBiometrics,
   onOpenGestures,
   onOpenMemory,
+  onOpenProtestHub,
   userProfile,
 }) => {
   const [input, setInput] = useState('');
@@ -81,6 +86,24 @@ export const ChatConsole: React.FC<ChatConsoleProps> = ({
 
   const promptSuggestions = [
     {
+      title: 'Protest Field Shield',
+      desc: 'Tear gas first aid & 4 Golden Phrases',
+      icon: ShieldAlert,
+      action: 'Show me immediate tear gas first aid and my legal rights if detained',
+    },
+    {
+      title: 'Digital OpSec & Comms',
+      desc: 'Lockdown Face ID, Signal & tracking defense',
+      icon: Smartphone,
+      action: 'Provide a complete digital security checklist for public protests',
+    },
+    {
+      title: 'Laragon & Localhost',
+      desc: 'Run on localhost:3000 / pascal.test',
+      icon: Terminal,
+      action: 'How do I run and test P.A.S.C.A.L in Laragon (localhost:3000 / pascal.test) for protests?',
+    },
+    {
       title: 'Biometric Status',
       desc: 'Verify facial & voiceprint authentication',
       icon: Scan,
@@ -91,12 +114,6 @@ export const ChatConsole: React.FC<ChatConsoleProps> = ({
       desc: 'Review what Pascal remembers about you',
       icon: Brain,
       action: 'What is stored in your active neural memory bank?',
-    },
-    {
-      title: 'Gesture Control',
-      desc: 'Test non-verbal hand motion navigation',
-      icon: Hand,
-      action: 'Calibrate optical hand gesture navigation',
     },
     {
       title: 'System Diagnostics',
@@ -130,8 +147,41 @@ export const ChatConsole: React.FC<ChatConsoleProps> = ({
                 P.A.S.C.A.L is your personal intelligent assistant with speech synthesis, face ID biometrics, and touchless gesture control.
               </p>
 
+              {/* Tactical Protest & Localhost Banner */}
+              {onOpenProtestHub && (
+                <div
+                  onClick={() => {
+                    audioFx.playBlip(900);
+                    onOpenProtestHub();
+                  }}
+                  className="mt-6 w-full max-w-xl p-3 rounded-2xl bg-gradient-to-r from-rose-500/10 via-amber-500/10 to-blue-500/10 dark:from-rose-950/40 dark:via-amber-950/30 dark:to-blue-950/40 border border-rose-300/60 dark:border-rose-900/50 flex items-center justify-between cursor-pointer hover:border-rose-500 transition-all shadow-xs group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-xl bg-rose-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                      <ShieldAlert className="w-4 h-4" />
+                    </div>
+                    <div className="text-left">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                          Protest Field & Laragon Localhost Hub
+                        </span>
+                        <span className="text-[10px] uppercase font-bold text-rose-600 dark:text-rose-400 bg-rose-100 dark:bg-rose-950/80 px-1.5 py-0.2 rounded-md">
+                          Field Ready
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                        Legal shield, tear gas first aid, OpSec checklist, emergency beacon & Laragon sync
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-xs font-semibold text-rose-600 dark:text-rose-400 group-hover:translate-x-1 transition-transform">
+                    Open Hub &rarr;
+                  </span>
+                </div>
+              )}
+
               {/* Suggestion Starter Cards (ChatGPT / Claude style) */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-8 w-full max-w-xl text-left">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-6 w-full max-w-xl text-left">
                 {promptSuggestions.map((item, idx) => {
                   const Icon = item.icon;
                   return (

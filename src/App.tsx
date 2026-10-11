@@ -17,6 +17,7 @@ import {
   Mic,
   Volume2,
   VolumeX,
+  ShieldAlert,
 } from 'lucide-react';
 import {
   ChatMessage,
@@ -37,8 +38,10 @@ import { GestureControlHUD } from './components/GestureControlHUD';
 import { MemoryCore, INITIAL_MEMORIES } from './components/MemoryCore';
 import { SystemDiagnostics } from './components/SystemDiagnostics';
 import { SettingsModal } from './components/SettingsModal';
+import { ProtestHubModal } from './components/ProtestHubModal';
 import { audioFx } from './utils/audioFx';
 import { speechEngine } from './utils/speechEngine';
+import { generateClientTacticalResponse } from './utils/tacticalEngine';
 
 const defaultAISettings: AISettings = {
   model: 'gemini-2.5-flash',
@@ -99,6 +102,7 @@ export function App() {
   const [memoryModalOpen, setMemoryModalOpen] = useState<boolean>(false);
   const [diagnosticsModalOpen, setDiagnosticsModalOpen] = useState<boolean>(false);
   const [settingsModalOpen, setSettingsModalOpen] = useState<boolean>(false);
+  const [protestModalOpen, setProtestModalOpen] = useState<boolean>(false);
 
   // Core System States
   const [systemState, setSystemState] = useState<SystemState>('idle');
@@ -356,11 +360,13 @@ export function App() {
         speechEngine.speak(replyText);
       }
     } catch (error: any) {
-      console.error('Error during chat transmission:', error);
-      const errorMsg: ChatMessage = {
+      console.warn('Backend communication failed or offline; activating client tactical engine:', error);
+      const offlineReply = generateClientTacticalResponse(userText, userProfile);
+
+      const assistantMsg: ChatMessage = {
         id: `msg-${Date.now() + 1}`,
         sender: 'pascal',
-        text: `P.A.S.C.A.L Neural Diagnostic: ${error.message || 'Transmission failed'}. Please verify your API key or network connection.`,
+        text: offlineReply,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         category: 'dialogue',
       };
@@ -370,12 +376,17 @@ export function App() {
           t.id === activeThreadId
             ? {
                 ...t,
-                messages: [...t.messages, errorMsg],
+                title: t.messages.length <= 1 ? userText.slice(0, 30) : t.title,
+                messages: [...t.messages, assistantMsg],
               }
             : t
         )
       );
-      audioFx.playBlip(300);
+
+      audioFx.playSuccess();
+      if (aiSettings.autoSpeakResponses || voiceModalOpen) {
+        speechEngine.speak(offlineReply);
+      }
     } finally {
       setSystemState('idle');
     }
@@ -474,6 +485,20 @@ export function App() {
             <span className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-2 mb-1">
               Modules
             </span>
+
+            <button
+              onClick={() => {
+                audioFx.playBlip(800);
+                setProtestModalOpen(true);
+              }}
+              className="w-full p-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-700 dark:text-rose-300 text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer border border-rose-300/40 dark:border-rose-900/40"
+            >
+              <div className="flex items-center gap-2.5">
+                <ShieldAlert className="w-4 h-4 text-rose-600 dark:text-rose-400" />
+                <span>Protest Field Hub</span>
+              </div>
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" title="Field Ready" />
+            </button>
 
             <button
               onClick={() => {
@@ -630,6 +655,19 @@ export function App() {
               </span>
               <SettingsIcon className="w-3 h-3 text-slate-400 group-hover:text-blue-500 transition-colors" />
             </button>
+
+            {/* Protest Field Hub Trigger */}
+            <button
+              onClick={() => {
+                audioFx.playBlip(800);
+                setProtestModalOpen(true);
+              }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl border border-rose-300 dark:border-rose-900 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/60 dark:hover:bg-rose-900/60 text-rose-700 dark:text-rose-300 text-xs font-semibold transition-all cursor-pointer shadow-xs active:scale-95"
+              title="Open Protest Field Hub & Localhost / Paragon Sync"
+            >
+              <ShieldAlert className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
+              <span className="hidden sm:inline">Protest Hub</span>
+            </button>
           </div>
 
           {/* Right Action Tools */}
@@ -707,6 +745,7 @@ export function App() {
           onOpenBiometrics={() => setBiometricsModalOpen(true)}
           onOpenGestures={() => setGestureModalOpen(true)}
           onOpenMemory={() => setMemoryModalOpen(true)}
+          onOpenProtestHub={() => setProtestModalOpen(true)}
           userProfile={userProfile}
         />
       </main>
@@ -804,6 +843,13 @@ export function App() {
             },
           ]);
         }}
+      />
+
+      {/* PROTEST & TACTICAL FIELD HUB MODAL */}
+      <ProtestHubModal
+        isOpen={protestModalOpen}
+        onClose={() => setProtestModalOpen(false)}
+        onSendChatMessage={(text) => handleSendMessage(text)}
       />
     </div>
   );

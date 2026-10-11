@@ -96,3 +96,30 @@ export interface AISettings {
   sendOnEnter: boolean;
   showTokenDiagnostics: boolean;
 }
+
+export interface ProtestIncident {
+  id: string;
+  timestamp: string;
+  location: string;
+  badgeNumber?: string;
+  agency?: string;
+  tag: 'detention' | 'chemical' | 'kettling' | 'medical' | 'property' | 'general';
+  description: string;
+  witnesses?: string;
+}
+
+export interface EmergencyContact {
+  id: string;
+  title: string;
+  number: string;
+  note: string;
+}
+
+export interface ProtestChecklistItem {
+  id: string;
+  category: 'opsec' | 'gear' | 'legal';
+  label: string;
+  completed: boolean;
+  critical?: boolean;
+}
+

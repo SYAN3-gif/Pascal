@@ -1,0 +1,22 @@
+# P.A.S.C.A.L Apache Configuration for Laragon
+# Placed in public/ to be copied to dist/ on build, or used directly in web root
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Standard SPA single-page application fallback
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . /index.html [L]
+</IfModule>
+
+# Laragon CORS & Iframe Embedding Headers
+<IfModule mod_headers.c>
+  Header set Access-Control-Allow-Origin "*"
+  Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+  Header set Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept, Authorization, x-api-key"
+  Header unset X-Frame-Options
+  Header set Content-Security-Policy "frame-ancestors *"
+</IfModule>
